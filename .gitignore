@@ -1,0 +1,45 @@
+# Visual Studio
+.vs/
+Intermediate/
+Bin/
+[Ii]ncludes/
+[Ll]ib/
+*.user
+*.suo
+*.db
+*.ipch
+
+# Compiled files
+*.obj
+*.o
+*.pdb
+*.ilk
+*.lib
+*.dll
+*.exe
+*.out
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+*.swp
+*.env
+
+# Other build files
+build/
+Build/
+build-*/
+CMakeFiles/
+CMakeCache.txt
+compile_commands.json
+vcpkg_installed/
+Testing/
+.cache/
+
+# Local presentation and files accidentally created by Git command input
+*.pdf
+/git
+/main
+/how 492ec5d --stat
+.vs/ 
