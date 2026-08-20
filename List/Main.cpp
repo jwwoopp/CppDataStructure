@@ -22,4 +22,12 @@ int main()
 	{
 		std::cout << value << "\n";
 	}
+
+	// 이터레이터 기반 루프 순회.
+	for (auto iterator = characterList.begin();
+		iterator != characterList.end();
+		++iterator)
+	{
+		std::cout << (*iterator) << "\n";
+	}
 }

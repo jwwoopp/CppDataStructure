@@ -3,20 +3,98 @@
 #include <iostream>
 #include <cassert>
 
+// 리스트 이터레이터.
+template<typename T>
+class ListIterator
+{
+public:
+	// 타입 재정의 (편의 목적).
+	using PointerType = T*;
+	using ReferenceType = T&;
+
+public:
+	ListIterator(PointerType pointer)
+		: pointer(pointer)
+	{
+	}
+
+	// 연산자 오버로딩 (포인터 관련).
+	ListIterator& operator++()
+	{
+		++pointer;
+		return *this;
+	}
+
+	ListIterator& operator++(int)
+	{
+		// 임시 저장.
+		ListIterator temp = *this;
+		++(*this);
+		return temp;
+	}
+
+	ListIterator& operator--()
+	{
+		--pointer;
+		return *this;
+	}
+
+	ListIterator& operator--(int)
+	{
+		// 임시 저장.
+		ListIterator temp = *this;
+		--(*this);
+		return temp;
+	}
+
+	ReferenceType operator[](int index) const
+	{
+		return *(pointer + index);
+	}
+
+	PointerType operator->() const
+	{
+		return pointer;
+	}
+
+	ReferenceType operator*() const
+	{
+		return *pointer;
+	}
+
+	// 비교 연산자 오버로딩.
+	bool operator==(const ListIterator& other) const
+	{
+		return pointer == other.pointer;
+	}
+
+	bool operator!=(const ListIterator& other) const
+	{
+		//return pointer != other.pointer;
+		return !(*this == other);
+	}
+
+private:
+	PointerType pointer = nullptr;
+};
+
+
 // 템플릿 동적 배열 클래스.
 // 템플릿은 왜 header와 cpp로 구분해서 구현하지 않나요?
-// 왜?
-
+// 템플릿은 추론(해석) 시점이 컴파일 시간이기 때문.
 template<typename T>
 class List
-
 {
+public:
+	// 이터레이터 설정.
+	using Iterator = ListIterator<T>;
+	using ConstIterator = ListIterator<const T>;
+
 public:
 	List()
 	{
 		// 시작할 때 기본 크기로 저장공간 할당.
 		ReAllocate(defaultSize);
-
 	}
 
 	~List()
@@ -34,7 +112,7 @@ public:
 		{
 			data = new T[other.capacity];
 		}
-		
+
 		// 저장된 데이터 복사.
 		for (int ix = 0; ix < size; ++ix)
 		{
@@ -51,21 +129,20 @@ public:
 			return *this;
 		}
 
-	// 새로운 공간 할당.
-	T* newData = nullptr;
+		// 새로운 공간 할당.
+		T* newData = nullptr;
 
-	if (other.capacity > 0)
-	{
-		newData = new T[other.capacity];
-
-		// 값 복사.
-		for (int ix = 0; ix < other.size; ++ix)
-
+		if (other.capacity > 0)
 		{
-			newData[ix] = other.data[ix];
+			newData = new T[other.capacity];
+
+			// 값 복사.
+			for (int ix = 0; ix < other.size; ++ix)
+			{
+				newData[ix] = other.data[ix];
+			}
 		}
 
-	}
 		// 기존의 관리하던 데이터 제거.
 		delete[] data;
 
@@ -92,14 +169,15 @@ public:
 	// 이동 대입 연산자.
 	List& operator=(List&& other)
 	{
-		// 예외처리.
+		// 예외 처리.
 		if (this == &other)
 		{
 			return *this;
 		}
+
 		// 기존 데이터 제거.
 		delete[] data;
-		
+
 		// 복사 처리.
 		data = other.data;
 		size = other.size;
@@ -113,17 +191,17 @@ public:
 		return *this;
 	}
 
-
 	// 맨 마지막 위치에 데이터 추가하는 함수.
 	void PushBack(const T& value)
 	{
 		// #1. 저장공간이 가득찼으면 재할당.
 		if (size == capacity)
 		{
-			int newCapacity = capacity == 0 ? defaultSize : capacity * scale;
+			int newCapacity = capacity == 0 ?
+				defaultSize : capacity * scale;
 			ReAllocate(newCapacity);
 		}
-		
+
 		// #2. 값추가.
 		data[size] = value;
 		++size;
@@ -131,9 +209,11 @@ public:
 
 	void PushBack(T&& value)
 	{
+		// #1. 저장공간이 가득찼으면 재할당.
 		if (size == capacity)
 		{
-			int newCapacity = capacity == 0 ? defaultSize : capacity * scale;
+			int newCapacity = capacity == 0 ?
+				defaultSize : capacity * scale;
 			ReAllocate(newCapacity);
 		}
 
@@ -148,7 +228,7 @@ public:
 		// 범위 검사.
 		if (index < 0 || index >= size)
 		{
-			// 조용한 예외 처리.
+			// 조용한 예외처리.
 			// Silent is violent (침묵은 폭력이다).
 			return;
 		}
@@ -187,8 +267,28 @@ public:
 	bool Empty() const { return size == 0; }
 
 	// 범위 기반 루프 사용 가능하도록 추가.
-	T* begin() const { return data; }
-	T* end() const { return data + size; }
+	//T* begin() const { return data; }
+	//T* end() const { return data + size; }
+
+	Iterator begin()
+	{
+		return Iterator(data);
+	}
+
+	Iterator end()
+	{
+		return Iterator(data ? data + size : nullptr);
+	}
+
+	ConstIterator begin() const
+	{
+		return ConstIterator(data);
+	}
+
+	ConstIterator end() const
+	{
+		return ConstIterator(data ? data + size : nullptr);
+	}
 
 private:
 	// 재할당 메소드.
@@ -202,9 +302,8 @@ private:
 		{
 			// data는 폐기 예정이기 때문에 move로 처리.
 			newBlock[ix] = std::move(data[ix]);
-
 		}
-	
+
 		// #3. 기존 저장공간 폐기.
 		delete[] data;
 
@@ -215,7 +314,6 @@ private:
 		capacity = newCapacity;
 	}
 
-
 private:
 	// 내부에서 관리하는 배열(메모리 주소).
 	T* data = nullptr;
@@ -223,13 +321,12 @@ private:
 	// 배열에 저장된 요소의 수.
 	int size = 0;
 
-	// 저장 공간 크기.
+	// 저장공간 크기.
 	int capacity = 0;
 
-	// 상수(초기 저장공간의 크기 값).
+	// 상수 (초기 저장공간의 크기 값).
 	const int defaultSize = 2;
 
 	// 상수 (크기가 증가하는 배수).
 	const int scale = 2;
-
 };
