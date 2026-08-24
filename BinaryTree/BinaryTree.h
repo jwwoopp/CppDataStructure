@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Node.h"
+#include <iostream>
 
 template<typename T>
 class BinaryTree
@@ -92,7 +93,41 @@ public:
 		return true;
 	}
 
+	void InorderTraverse() const
+	{
+		// 중위 순회 재귀 함수 호출.
+		InorderRecursive(root, 0);
+	}
+
 private:
+	// 중위 순회 재귀 함수.
+	void InorderRecursive(Node<T>* node, int depth) const
+	{
+		// 종료 조건.
+		if (!node) 
+		{
+			return;
+		}
+
+		// 왼쪽 하위 트리 방문.
+		InorderRecursive(node->left, depth + 1);
+
+		// 현재(부모) 노드 방문.
+		
+		// 노드의 깊이 값(빈 칸) 출력.
+		for (int ix = 0; ix < depth; ++ix)
+		{
+			std::cout << "  ";
+		}
+
+		// 현재 노드 값 출력.
+		std::cout << node->GetData() << "\n";
+
+		// 오른쪽 하위 트리 방문.
+		InorderRecursive(node->right, depth + 1);
+
+	}
+
 	// 특정 노드의 왼쪽 자손 노드 추가 함수.
 	bool AddLeftChildToNode(Node<T>* parent, const T& childData)
 	{
