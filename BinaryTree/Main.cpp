@@ -38,4 +38,5 @@ int main()
 	{
 		std::cout << "Q 검색 실패\n";
 	}
+
 }

@@ -36,4 +36,20 @@ int main()
 	{
 		std::cout << "11 검색 실패.\n";
 	}
+
+	// 순회.
+	tree.InorderTraverse();
+
+	// 삭제.
+	if (tree.Remove(7))
+	{
+		std::cout << "7 제거 성공\n";
+	}
+	else
+	{
+		std::cout << "제거 실패.\n";
+	}
+
+	std::cout << "삭제 후 순회\n";
+	tree.InorderTraverse();
 }

@@ -149,7 +149,117 @@ public:
 		return false;
 	}
 
+	// 삭제 요청 함수.
+	bool Remove(const T& data)
+	{
+		// 삭제 결과.
+		bool deleted = false;
+	
+		// 삭제 처리 재귀 함수 호출.
+		root = RemoveRecursive(root, data, deleted);
+
+		// 결과 반환.
+		return deleted;
+	}
+
+	// 중위 순회.
+	void InorderTraverse() const
+	{
+		// 순회 재귀 함수 호출.
+		InorderRecursive(root);
+		std::cout << "\n";
+	}
+
 private:
+	
+	// 중위 순회 재귀 함수.
+	void InorderRecursive(Node<T>* node) const
+	{
+		// 종료 조건.
+		if (!node)
+		{
+			return;
+		}
+
+		// 중위 순회는 부모(현재) 노드를 중간에 방문.
+		// 왼쪽 -> 부모(현재) -> 오른쪽.
+		InorderRecursive(node->left);
+
+		std::cout << node->GetData() << "  ";
+
+		InorderRecursive(node->right);
+	}
+
+	// 삭제 처리 재귀 함수.
+	// 삭제가 끝난 서브 트리의 새로운 루트 노드를 반환.
+	Node<T>* RemoveRecursive(Node<T>* node, const T& data, bool& deleted)
+	{
+		// 종료 조건.
+		if (!node)
+		{
+			return nullptr;
+		}
+		// 검색.
+		// 찾는 노드가 현재 노드보다 작으면 왼쪽으로.
+		if (data < node->data)
+		{
+			node->left = RemoveRecursive(node->left, data, deleted);
+		}
+		// 찾는 노드가 현재 노드보다 크면 오른쪽으로.
+		else if (node->data < data)
+		{
+			node->right = RemoveRecursive(node->right, data, deleted);
+		}
+		// 삭제 처리.
+		else
+		{
+			// 삭제됨을 알림.
+			deleted = true;
+
+			// 경우 1: 왼쪽 자손이 없는 경우.
+
+			if (!node->left)
+			{
+				// 오른쪽 자손이 삭제 노드 위치를 대체.
+				Node<T>* rightChild = node->right;
+
+				// 재귀적으로 삭제를 방지하기 위해 null 대입.
+				node->right = nullptr;
+				delete node;
+
+				return rightChild;
+			}
+
+			// 경우 2: 오른쪽 자손이 없는 경우.
+			else if (!node->right)
+			{
+				// 왼쪽 자손이 삭제 노드를 대체.
+				Node<T>* leftChild = node->left;
+
+				// 재귀적으로 삭제되는 걸 방지하기 위해 null 대입.
+				node->left = nullptr;
+				delete node;
+
+				return leftChild;
+
+
+			}
+
+			// 경우 3: 자손이 둘 다 있는 경우.
+			Node<T>* successor = FindMinimum(node->right);
+
+			// 삭제할 노드의 값을 교체.
+			node->data = successor->data;
+
+			// 후속자 노드의 삭제 처리(재귀적으로).
+			node->right = RemoveRecursive(node->right, successor->data, deleted);
+		}
+
+		// 검색에 실패하면 원래 노드 반환.
+		return node;
+	}
+
+
 	// 최솟값 노드 검색 함수.
 	Node<T>* FindMinimum(Node<T>* node) const
 	{
